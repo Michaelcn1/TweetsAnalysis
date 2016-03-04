@@ -19,13 +19,13 @@ open 'ec2rc.sh' in ec2 credential directory
 c.Put [YOUR KEY PAIR] in the deployment directory with 'fabfile.py'. 
 
 
-1. On the politician tweets collection server, upload following source files and run: 
+1. On the tweets collection server, upload following source files and run: 
 	
-	friendship.py                (politician follow each other infor)
+	friendship.py                (users follow each other infor)
 	
-	harvest_data.py              (collect each politician's tweet)
+	harvest_data.py              (collect each user's tweet)
 	
-	harvest_plinfo.py            (collect one tweet for each politician)
+	harvest_plinfo.py            (collect one tweet for each user)
 	
 	fun_make_twitter_request.py  (call twitter API sub function)
 	
@@ -38,6 +38,3 @@ c.Put [YOUR KEY PAIR] in the deployment directory with 'fabfile.py'.
 harvest_vic.py               (using tweepy to collect tweets from all over Victoria)
 
 
-3. Upload the VicPoliticianTwitterAnlysis folder. then cd VicPoliticianTwitterAnlysis, run the following command to launch web app:
-	
-	node app.js
