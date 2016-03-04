@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>Tweet day</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <script src="js/libs/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="js/libs/markerclusterer.min.js"></script>
+    <script type="text/javascript" src="js/libs/jquery.ui.map.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCyBqm-SWSxef98rnNJUGHfwhxotyCFd8"></script>
+    <script type="text/javascript">
+        console.log('111');
+
+
+        var districts = {'JacintaAllanMP':'East Bendigo','DanielAndrewsMP':'Mulgrave','LouiseAsherMP':'Brighton','TedBaillieu':'Hawthorn','GregMLC':'Northern Metropolitan','BradBattinMP':'Gembrook',
+                    'DonnaBauerMP':'Carrum','GaryBlackwoodMP':'Narracan','ColinBrooksMP':'Bundoora','TimBullMP':'Gippsland East','NealeBurgess':'Hastings','CCampbellMP':'Pascoe Vale',
+                    'ACarbinesMP':'Ivanhoe','BenCarrollMP':'Niddrie','RobertClarkMP':'Box Hill','PCrispMildura':'Mildura','LilyDAmbrosioMP':'Mill Park','HughDelahunty':'Lowan',
+                    'martindixonmp':'Nepean','LukeDonnellan':'Narre Warren North','DDrumMP':'Northern Victoria','mareeedwardsmp':'Bendigo West','EidehKhalil':'Western Metropolitan',
+                    'johnerenmp':'Lara','MartinFoleyMP':'Albert Park','Jane_GarrettMP':'Brunswick','michaelgidley':'Mount Waverley','DanielleGreenMP':'Yan Yean','MatthewGuyMP':'Northern Metropolitan',
+                    'ColleenHartland':'Western Metropolitan','JillHennessyMP':'Altona','SteveHerbertMP':'Eltham','DavidHodgettMP':'Kilsyth','NatHutchins':'Keilor',
+                    'GavinJennings':'South-Eastern Metropolitan','MarleneKairouz':'Kororoit','JenniferKanis':'Melbourne','andrewkatosmp':'South Barwon','SharonKnightMP':'Ballarat West',
+                    'ShaunLeaneMP':'Eastern Metropolitan','JohnLendersMP':'Southern Metropolitan','honglim_mp':'Clayton','WendyLovellMP':'Northern Victoria',
+                    'JMaddenMP':'Essendon','Tim_McCurdy':'Murray Valley','Frank_McGuire':'Broadmeadows','CindyMcLeishMP':'Seymour','CesarMelhem':'Western Metropolitan',
+                    'JamesMerlinoMP':'Monbulk','JennyMikakos':'Northern Metropolitan','AmandaMillarMP':'Northern Victoria','EMillerMP':'Bentleigh','TerryMulderMP':'Polwarth',
+                    'Vic_Premier':'South-West Coast','DonNardella':'Melton','LisanevilleMP':'Bellarine','clemnewtonbrown':'Prahran','wadenoonan':'Williamstown','RussellNortheMP':'Morwell',
+                    'michaelobrienmp':'Malvern','DannyOBrienMP':'Eastern Victoria','ODonohueMLC':'Eastern Victoria','CraigOndarchie':'Northern Metropolitan','MartinPakulaMP':'Lyndhurst',
+                    'timpallas' :'Tarneit','sueMLC':'Southern Metropolitan','JudePerera1':'Cranbourne','IngaPeulichMP':'South-Eastern Metropolitan','JaalaPulford':'Western Victoria',
+                    'RichPhillipsMLC':'South-Eastern Metropolitan','RichardsonFiona':'Northcote','AndrewRonaldsMP':'Eastern Victoria','DeeRyall':'Mitcham','peterryanMP':'Gippsland South',
+                    'RyanSmithMP':'Warrandyte','AdemSomyurek':'South-Eastern Metropolitan','SouthwickMP':'Caulfield','BillSykesMP':'Benalla','BrianTeeMP':'Eastern Metropolitan',
+                    'MarshaThomsonMP':'Footscray','billtilleymla':'Benambra','heidivic':'Bayswater','NickWakelingMP':'Ferntree Gully','PeterWalshMP':'Swan Hill',
+                    'GrahamWattMP':'Burwood','paulwellerMLA':'Rodney','KimWellsMP':'Scoresby','Mary_Wooldridge':'Doncaster','lorrainewreford':'Mordialloc','rwynnemp':'Richmond','Bronwyn_Pike':'Melbourne'}
+
+        $(function(){
+            $('#map_canvas').gmap({'center': '-37.4885506,144.5779014','scrollwheel':true});
+            var wordList =[];
+            var jsonData = $.ajax({
+                url: "/geoLocation",
+                dataType: "json",
+                async: false
+            }).responseText;
+            var obj = jQuery.parseJSON(jsonData);
+
+            $('#map_canvas').gmap({'zoom': 2, 'disableDefaultUI':true}).bind('init', function(evt, map) {
+                console.log("map=" + map);
+
+                $.each(obj, function(i, item) {
+                    console.log("lat=" + item.lat);
+                    console.log("lng=" + item.lng);
+
+                    $('#map_canvas').gmap('addMarker', {
+                        'position': new google.maps.LatLng(item.lat, item.lng)
+                    }).click(function() {
+                        item.content  = item.content  + '</p><br><p>Electorate:' + districts[item.name] + '</p>'
+                        $('#map_canvas').gmap('openInfoWindow', { content : item.content }, this);
+                    });
+                });
+                // $('#map_canvas').gmap('set', 'MarkerClusterer', new MarkerClusterer(map, $(this).gmap('get', 'markers')));
+
+            });
+            
+            function findFreqWords(screenName) {
+
+                jQuery.ajax({
+                    type: "GET",
+                    url: "/frequentWords?screen_name=" + screenName,
+                    cache: true,
+                    success: function(jsonData){
+                        
+                        $.each(jsonData, function(i, item) {
+                            console.log("the word:"+ item);
+
+                            wordList.push([item]);
+                        });
+                    }
+                });
+            }
+
+
+            var map = $('#map_canvas').gmap('get', 'map')
+            $(map).click(function(event) {
+                $lon =event.latLng.lng();
+                $lat =event.latLng.lat();
+                var url = "http://maps.google.com/maps/api/geocode/json?latlng="+$lat+","+$lon+"&sensor=false";
+
+                
+
+                $.getJSON(url, function (json,status) {
+                    if (status =="success"){
+                        var long_name = json.results[0].address_components[2].long_name;
+                        console.log('long_name : ', long_name);
+                        var short_name = json.results[0].address_components[2].short_name;
+                        console.log('short_name : ', short_name);
+                    
+                        var contentString ='';
+                        wordList = [];
+                        var wordsList = [];
+                        $.each(districts, function(key, value) {
+                            if (value == short_name) {
+                                console.log('key  : ', key);
+                                console.log('value : ', value);
+                                // wordsList=findFreqWords(key);
+                                // console.log('finished');
+                                contentString += '<p>' + key + '</p><br><p>' + "Most words used:";
+
+                                jQuery.ajax({
+                                    type: "GET",
+                                    url: "/frequentWords?screen_name=" + key,
+                                    cache: true,
+                                    success: function(jsonData){
+                        
+                                        $.each(jsonData, function(i, item) {
+                                            console.log("the word:"+ item);
+                                            contentString += item + ",";
+                                        });
+                                        contentString +='</p><br>';
+                                        console.log('contentString : ', contentString);
+                                        if (contentString !=''){
+                                            var infowindowOptions = {
+                                                'position': new google.maps.LatLng($lat,$lon),
+                                                content: contentString
+                                            };
+                                            // var infowindow = new google.maps.InfoWindow(infowindowOptions);
+                                            // infowindow.open(map);
+                                            $('#map_canvas').gmap('openInfoWindow', infowindowOptions);
+
+                                        }
+                                    }
+                                });
+
+                                
+
+                                // contentString += '<p>' + key + '</p><br><p>' ;
+                                // $.each(wordsList, function(i, item) {
+                                //     console.log('item : ', item);
+                                //     contentString += item;
+                                // });
+                                // contentString +='</p><br>';
+                                // console.log('contentString : ', contentString);
+                                
+
+                            }
+                        });
+                        // if (contentString !=''){
+                        //     var infowindowOptions = {
+                        //         'position': new google.maps.LatLng($lat,$lon),
+                        //         content: contentString
+                        //     };
+                        //     // var infowindow = new google.maps.InfoWindow(infowindowOptions);
+                        //     // infowindow.open(map);
+                        //     $('#map_canvas').gmap('openInfoWindow', infowindowOptions);
+                        // }
+                    } else {
+                        alert("Geocode was not successful for the following reason: " + status);
+                    }
+                        
+
+                });
+                              
+            });
+            
+
+            
+
+            function individualPolition() {
+
+                // $("map_canvas").hide();
+                // $("map_canvas1").show();
+                // $("map_canvas2").hide();
+                // $('#map_canvas').gmap('get', 'map');
+                // $('#map_canvas1').gmap("clearMarkers");
+                $('#map_canvas').gmap('clear', 'markers');
+                // $("#map_canvas").html("");
+                $('#map_canvas').gmap({ 'center': '-25.363882,131.044922','scrollwheel':true});
+                var jsonData = $.ajax({
+                    url: "/geoLocation",
+                    dataType: "json",
+                    async: false
+                }).responseText;
+                var obj = jQuery.parseJSON(jsonData);
+                var poli_name = $('#politionlists').val();
+                console.log("poli_name=" + poli_name);
+
+                // $('#map_canvas1').gmap({'zoom': 2, 'disableDefaultUI':true}).bind('init', function(evt, map) {
+                    console.log("map=" + map);
+
+                    $.each(obj, function(i, item) {
+                        
+                        if (item.name == poli_name){
+                            console.log("name in db=" + item.name);
+                            console.log("lat=" + item.lat);
+                            console.log("lng=" + item.lng);
+                            $('#map_canvas').gmap('addMarker', {  
+                                'position': new google.maps.LatLng(item.lat, item.lng)
+                            }).click(function() {
+                                $('#map_canvas').gmap('openInfoWindow', { content : item.content }, this);
+                            });
+                        }
+                    });
+                    // $('#map_canvas1').gmap('set', 'MarkerClusterer', new MarkerClusterer(map, $(this).gmap('get', 'markers')));
+
+                // });
+
+
+            } 
+
+            function showTopic() {
+                
+                $('#map_canvas').gmap('clear', 'markers');
+                $('#map_canvas').gmap({ 'center': '-25.363882,131.044922','scrollwheel':true});
+                var hotTopic = $("#searchFieldTopic").val();
+                console.log(hotTopic);
+                // var jsonData = $.ajax({
+                jQuery.ajax({
+                    url: "/geoLocationMax?keyword=" + $("#searchFieldTopic").val(),
+                    dataType: "json",
+                    cache: false,
+                    // async: false
+                    success: function(jsonData) {
+                // }).responseText;
+                // var obj = jQuery.parseJSON(jsonData);
+                        var name_max = '';
+                        var number_max = 0;
+
+                // $('#map_canvas').gmap({'zoom': 2, 'disableDefaultUI':true}).bind('init', function(evt, map) {
+                        console.log("map=" + map);
+                        console.log('jsonData=' + jsonData);
+                
+
+                        $.each(jsonData, function(i, item) {
+                            console.log('jsonData=' + jsonData);
+
+                            $('#map_canvas').gmap('addMarker', {
+                                'position': new google.maps.LatLng(item.lat, item.lng)
+                            }).click(function() {
+                                $('#map_canvas').gmap('openInfoWindow', { content : item.content }, this);
+                            });
+                        });
+                    }
+                // $('#map_canvas').gmap('set', 'MarkerClusterer', new MarkerClusterer(map, $(this).gmap('get', 'markers')));
+
+                // });
+
+
+                });
+            }
+
+            $( "#submit" ).click(function() {
+                individualPolition();
+            });
+            $( "#searchTopic" ).click(function() {
+                showTopic();
+            });
+
+        });
+
+        
+
+
+    </script>
+
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Victorian Political Tweets Analysis</a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+
+                <li><a href="index.html">Politician List</a></li>
+
+                <li ><a href="followers_count.html">Popular Politicians</a></li>
+                <li ><a href="retweet_count.html">Most Retweeted Politicians</a></li>
+            </ul>
+
+            <ul class="nav nav-sidebar">
+                <li><a href="first_tweet_report.html">First Tweet</a></li>
+                <li ><a href="weekday_report.html">Tweet Weekday</a></li>
+                <li ><a href="tweet_time_report.html">Tweet Time</a></li>
+                <li><a href="tweetsource_report.html">Tweet Source</a></li>
+                <li  class="active"><a href="geolocation_report.html">Tweet Geolocation</a></li>
+
+
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li ><a href="tweet_sentiment.html">Tweet Sentiment</a></li>
+                <li><a href="tweet_sentiment2.html">Tweet Sentiment2</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="trendy_topic.html">Trendy Topic</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div class="row">
+                <div class="col-sm-2">
+                    <select id="politionlists">
+                        <option value="AdemSomyurek">Adem Somyurek</option>
+                        <option value="AmandaMillarMP">Amanda Millar</option> 
+                        <option value="andrewkatosmp">Andrew Katos</option> 
+                        <option value="AndrewRonaldsMP">Andrew Ronalds</option> 
+                        <option value="ACarbinesMP">Anthony Carbines</option>
+                        <option value="BenCarrollMP">Benjamin Carroll </option>
+                        <option value="BradBattinMP">Bradley Battin</option> 
+                        <option value="BrianTeeMP">Brian Tee</option> 
+                        <option value="Bronwyn_Pike">Bronwyn Pike</option>
+                        <option value="CesarMelhem">Cesar Melhem</option>
+                        <option value="clemnewtonbrown">Clement Newton-Brown</option>
+                        <option value="ColinBrooksMP">Colin Brooks</option>
+                        <option value="ColleenHartland">Colleen Hartland </option>
+                        <option value="CraigOndarchie">Craig Ondarchie</option>   
+                        <option value="DDrumMP">Damian Drum</option>
+                        <option value="DanielAndrewsMP">Daniel Andrews</option>
+                        <option value="DannyOBrienMP">Daniel O'Brien</option> 
+                        <option value="DanielleGreenMP">Danielle Green</option>
+                        <option value="DavidHodgettMP">David Hodgett</option>
+                        <option value="SouthwickMP">David Southwick</option>
+                        <option value="DeeRyall">Deanne Ryall</option>
+                        <option value="Vic_Premier">Denis Napthine</option>
+                        <option value="DonNardella">Donato Nardella</option> 
+                        <option value="DonnaBauerMP">Donna Bauer</option>
+                        <option value="TedBaillieu">Edward(Ted) Baillieu</option>
+                        <option value="ODonohueMLC">Edward O'Donohue</option>
+                        <option value="EMillerMP">Elizabeth Miller</option>
+                        <option value="RichardsonFiona">Fiona Richardson</option> 
+                        <option value="Frank_McGuire">Frank McGuire</option>
+                        <option value="GaryBlackwoodMP">Gary Blackwood</option> 
+                        <option value="GavinJennings">Gavin Jennings</option>
+                        <option value="RichPhillipsMLC">Gordon Rich-Phillips</option> 
+                        <option value="GrahamWattMP">Graham Watt</option>
+                        <option value="GregMLC">Greg Barber</option>
+                        <option value="heidivic">Heidi Victoria</option>
+                        <option value="honglim_mp">Hong Lim</option>
+                        <option value="HughDelahunty">Hugh Delahunty</option> 
+                        <option value="IngaPeulichMP">Inga Peulich</option> 
+                        <option value="JaalaPulford">Jaala Pulford</option>
+                        <option value="JacintaAllanMP">Jacinta Allan</option>
+                        <option value="JamesMerlinoMP">James Merlino</option>
+                        <option value="Jane_GarrettMP">Jane Garrett</option> 
+                        <option value="JPowellMP">Jeanette Powell</option>
+                        <option value="JenniferKanis">Jennifer Kanis</option>
+                        <option value="JennyMikakos">Jenny Mikakos</option> 
+                        <option value="JillHennessyMP">Jill Hennessy</option>
+                        <option value="johnerenmp">John Eren</option> 
+                        <option value="JohnLendersMP">John Lenders</option>
+                        <option value="JudePerera1">Jude Perera</option> 
+                        <option value="JMaddenMP">Justin Madden</option>
+                        <option value="EidehKhalil">Khalil Eideh</option>
+                        <option value="KimWellsMP">Kim Wells</option>
+                        <option value="LilyDAmbrosioMP">Lily D'Ambrosio</option>
+                        <option value="LisanevilleMP">Lisa Neville</option>
+                        <option value="lorrainewreford">Lorraine Wreford </option>
+                        <option value="LouiseAsherMP">Louise Asher</option>
+                        <option value="CindyMcLeishMP">Lucinda McLeish</option>   
+                        <option value="LukeDonnellan">Luke Donnellan</option> 
+                        <option value="mareeedwardsmp">Maree Edwards</option>
+                        <option value="MarleneKairouz">Marlene Kairouz</option> 
+                        <option value="MarshaThomsonMP">Marsha Thomson</option>
+                        <option value="martindixonmp">Martin Dixon</option>
+                        <option value="MartinFoleyMP">Martin Foley</option>  
+                        <option value="MartinPakulaMP">Martin Pakula</option>
+                        <option value="Mary_Wooldridge">Mary Wooldridge</option>  
+                        <option value="MatthewGuyMP">Matthew Guy</option>
+                        <option value="michaelgidley">Michael Gidley</option> 
+                        <option value="michaelobrienmp">Michael O'Brien</option> 
+                        <option value="NatHutchins">Natalie Hutchins </option>
+                        <option value="NealeBurgess">Neale Burgess</option> 
+                        <option value="NickWakelingMP">Nick Wakeling</option> 
+                        <option value="paulwellerMLA">Paul Weller</option> 
+                        <option value="PCrispMildura">Peter Crisp</option> 
+                        <option value="peterryanMP">Peter Ryan</option>
+                        <option value="PeterWalshMP">Peter Walsh</option>
+                        <option value="rwynnemp">Richard Wynne</option>
+                        <option value="RyanSmithMP">Ryan Smith</option>
+                        <option value="RobertClarkMP">Robert Clark</option> 
+                        <option value="RussellNortheMP">Russell Northe</option>
+                        <option value="SharonKnightMP">Sharon Knight</option>  
+                        <option value="ShaunLeaneMP">Shaun Leane</option> 
+                        <option value="SteveHerbertMP">Steven Herbert</option> 
+                        <option value="sueMLC">Susan Pennicuik</option>     
+                        <option value="TerryMulderMP">Terry Mulder</option> 
+                        <option value="TimBullMP">Tim Bull</option>              
+                        <option value="timpallas">Tim Pallas</option>               
+                        <option value="Tim_McCurdy">Timothy McCurdy</option>  
+                        <option value="wadenoonan">Wade Noonan</option> 
+                        <option value="WendyLovellMP">Wendy Lovell</option>   
+                        <option value="BillSykesMP">William Sykes</option>  
+                        <option value="billtilleymla">William Tilley</option>       
+                    </select>
+                    
+                </div>
+                
+            <div class="col-sm-1"><button type="button" class="btn btn-primary btn-lg" id = "submit">Submit</button></div>
+                  
+            <div class="col-sm-6">
+                <input type="text" class="form-control" placeholder="given a topic which politician tweets the most..." id = "searchFieldTopic">
+            </div>
+            <div class="col-sm-1"><button type="button" class="btn btn-primary btn-lg" id = "searchTopic">Search</button></div>
+              </div>
+            <div class="row" id="alert_placeholder">
+
+
+            </div>
+            <div id="map_canvas" style="width: 1200px; height: 800px;"></div>
+
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

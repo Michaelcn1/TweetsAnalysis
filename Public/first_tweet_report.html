@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>Tweet Time</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <script src="js/libs/jquery-1.10.2.js"></script>
+    <script src="js/report.js"></script>
+    <script type="text/javascript">
+        console.log('111');
+        $(document).ready(function(){
+
+            ajaxindicatorstart('loading data.. please wait..');
+            var jsonData = $.ajax({
+                url: "/firstTweetReport",
+                dataType: "json",
+                async: false
+            }).responseText;
+            ajaxindicatorstop();
+            var obj = jQuery.parseJSON(jsonData);
+
+            var data2 = [];
+
+            var txt = "";
+            data2.push(['Date', 'name']);
+            $.each(obj, function(i, item) {
+                data2.push("<li id='" + item.key + "'>" + item.value + "</li>" );   
+                var keyItem = item.key[0];
+                 keyItem =keyItem.toString().substring(0,10);
+          
+                txt += "<tr><td><img src=" + item.value +"></td><td>"+keyItem+" </td><td>"+item.key[1]+"</td></tr>";
+                console.log(item.key);
+                console.log(item.value);
+            });
+            // $( "<url/>", {
+            //     "class": "col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main",
+            //     html: data2.join( "" )
+            //     }).appendTo( "chart_div" );
+
+            if(txt != ""){
+                $("#table").append(txt).removeClass("hidden");
+            }
+        });
+
+    </script>
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Victorian Political Tweets Analysis</a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+
+                <li><a href="index.html">Politician List</a></li>
+
+                <li ><a href="followers_count.html">Popular Politicians</a></li>
+                <li ><a href="retweet_count.html">Most Retweeted Politicians</a></li>
+            </ul>
+
+            <ul class="nav nav-sidebar">
+                <li class="active"><a href="first_tweet_report.html">First Tweet</a></li>
+                <li><a href="weekday_report.html">Tweet Weekday</a></li>
+                <li><a href="tweet_time_report.html">Tweet Time</a></li>
+                <li><a href="tweetsource_report.html">Tweet Source</a></li>
+                <li><a href="geolocation_report.html">Tweet Geolocation</a></li>
+
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li ><a href="tweet_sentiment.html">Tweet Sentiment</a></li>
+                <li><a href="tweet_sentiment2.html">Tweet Sentiment2</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="trendy_topic.html">Trendy Topic</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div id="chart_div" >
+                <table id="table" class="table table-striped hidden">
+                    <tr>
+                        <th>#</th>
+                        <th>First Tweet Date</th>
+                        <th>Politician Name</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

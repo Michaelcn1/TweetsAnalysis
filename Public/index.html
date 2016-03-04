@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Political Tweets Analysis</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+
+</head>
+
+<body>
+<script type="text/x-handlebars">
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Victorian Political Tweets Analysis</a>
+            </div>
+            <div class="navbar-collapse collapse">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+                    {{#link-to "politicianList" tagName="li" href=false}}<a {{bind-attr href="view.href"}}>Politician List</a>{{/link-to}}
+
+                    <li><a href="followers_count.html">Popular Politicians</a></li>
+                    <li><a href="retweet_count.html">Most Retweeted Politicians</a></li>
+                </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="first_tweet_report.html">First Tweet</a></li>
+                    <li><a href="weekday_report.html">Tweet Weekday</a></li>
+                    <li><a href="tweet_time_report.html">Tweet Time</a></li>
+                    <li><a href="tweetsource_report.html">Tweet Source</a></li>
+                    <li><a href="geolocation_report.html">Tweet Geolocation</a></li>
+
+                </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="tweet_sentiment.html">Tweet Sentiment</a></li>
+                    <li><a href="tweet_sentiment2.html">Tweet Sentiment2</a></li>
+                </ul>
+                <ul class="nav nav-sidebar">
+                    <li><a href="trendy_topic.html">Trendy Topic</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                {{outlet}}
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/x-handlebars" data-template-name="politicianList">
+    <h1 class="page-header">Politicians</h1>
+    
+    <table class="table table-striped">
+        <thead>
+            <th>#</th>
+            <th {{action "sort" "name"}}>Name</th>
+            <th {{action "sort" "district"}}>District</th>
+            <th {{action "sort" "party"}}>Party</th>
+            <th {{action "sort" "followers_count"}}>Follower Count</th>
+            <th {{action "sort" "friends_count"}}>Friends Count</th>
+            <th {{action "sort" "statuses_count"}}>Tweets Count</th>
+            <th>Description</th>
+        </thead>
+        <tbody>
+        {{#each controller}}
+        <tr>
+            <td><img {{bind-attr src=profile_image_url}} /> </td>
+            <td>{{#link-to 'politicianDetail' this}}{{name}}{{/link-to}}</td>
+            <td>{{district}}</td>
+            <td>{{party}}</td>
+            <td>{{format-number followers_count}}</td>
+            <td>{{format-number friends_count}}</td>
+            <td>{{format-number statuses_count}}</td>
+            <td>{{description}}</td>
+        </tr>
+        {{/each}}
+        </tbody>
+        </table>
+</script>
+
+<script type="text/x-handlebars" data-template-name="politicianDetail">
+    <h1 class="page-header">{{name}}</h1>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="ProfileAvatar">
+                <img {{bind-attr src=detail_image_url}} class="ProfileAvatar-image" >
+            </div>
+            <br/><br/>
+
+        </div>
+        <div class="col-md-5">
+            <div class="form-group">
+                <label>Account Create: </label>
+                {{format-date created_at}}
+            </div>
+            <div class="form-group">
+                <label>Tweets per day: </label>
+                {{average_tweet}}
+            </div>
+            <div class="form-group">
+                <label>Description: </label>
+                {{description}}
+            </div>
+            <div class="form-group">
+                <label>Party: </label>
+                {{party}}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <ul class="list-group">
+                <li class="list-group-item"><a {{bind-attr href=frequentWords_url}}>Most frequently used words</a></li>
+                <li class="list-group-item"><a {{bind-attr href=frequentHashtags_url}}>Most frequently used hashtags</a></li>
+                <li class="list-group-item"><a {{bind-attr href=mentionedPeople_url}}>Mentioned people</a></li>
+                <li class="list-group-item"><a {{bind-attr href=tweetTime_url}}>Tweet time</a></li>
+                <li class="list-group-item"><a {{bind-attr href=relationship_url}}>Follower relationship</a></li>
+            </ul>
+        </div>
+    </div>
+
+
+
+
+
+</script>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="js/libs/jquery-1.10.2.js"></script>
+<script src="js/libs/handlebars-1.1.2.js"></script>
+<script src="js/libs/ember-1.5.1.js"></script>
+<script src="js/libs/ember-data.js"></script>
+<script src="js/libs/bootstrap.min.js"></script>
+<!--<script src="js/libs/docs.min.js"></script>-->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
+<!--<script src="http://cdnjs.cloudflare.com/ajax/libs/showdown/0.3.1/showdown.min.js"></script>-->
+<script src="js/app.js"></script>
+<script src="js/modules.js"></script>
+<!-- to activate the test runner, add the "?test" query string parameter   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>-->
+<!--<script src="tests/runner.js"></script>-->
+
+</body>
+</html>

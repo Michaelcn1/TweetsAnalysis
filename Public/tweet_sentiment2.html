@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>Tweet Sentiment</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <script src="js/libs/jquery-1.10.2.js"></script>
+    <script src="js/libs/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="js/report.js"></script>
+    <script type="text/javascript">
+        console.log('111');
+        google.load("visualization", "1", {packages: ["corechart"]});
+        //google.setOnLoadCallback(drawChart1);
+
+
+        $(function () {
+                  var  warning = function(message) {
+                        $('#alert_placeholder').html('<div class="col-sm-6 alert alert-error alert-danger alert-dismissable"><a class="close" data-dismiss="alert">×</a>' +
+                                message + '</div>');
+
+
+                    };
+
+            function drawChart1() {
+                $('#alert_placeholder').html('');
+                console.log('drawChart');
+//                var jsonData = $.ajax({
+//                    url: "/tweetSentimentByKeyword?keyword=" + $("#searchField").val(),
+//                    dataType: "json",
+//                    async: false
+//                }).responseText;
+
+
+                jQuery.ajax({
+                    type: "GET",
+                    url: "/tweetSentiment2ByKeyword?keyword=" + $("#searchField").val(),
+                    cache: true,
+                    success: function (jsonData) {
+                        console.log('jsonData=' + jsonData);
+                       // var obj = jQuery.parseJSON(jsonData);
+
+                        var data2 = [];
+                        var data3 = [];
+
+                        data2.push(['Year', 'Liberal', "Labor", "Green", "Nationals"]);
+                        data3.push(['Year', 'Liberal', "Labor", "Green", "Nationals"]);
+
+                        var positiveData = jsonData.positive;
+                        console.log('positiveData=' + positiveData);
+                        var negativeData = jsonData.negative;
+                        for (var key in positiveData) {
+
+                            data2.push([key.toString(), positiveData[key]['liberal'], positiveData[key]['labor'], positiveData[key]['green'], positiveData[key]['nationals']]);
+
+                        }
+
+                        for (var key in negativeData) {
+
+                            data3.push([key.toString(), negativeData[key]['liberal'], negativeData[key]['labor'], negativeData[key]['green'], negativeData[key]['nationals']]);
+
+                        }
+
+                         var data = google.visualization.arrayToDataTable(data2);
+                        var dataN = google.visualization.arrayToDataTable(data3);
+
+//                        var data = google.visualization.arrayToDataTable([
+//                            ['Party', 'Fantasy & Sci Fi', 'Romance', 'Mystery/Crime', 'General',
+//                                'Western', 'Literature'  ],
+//                            ['2010', 10, 0, 0, 0, 0, 0],
+//                            ['2020', 16, 22, 23, 30, 16, 9],
+//                            ['2030', 28, 19, 29, 30, 12, 13],
+//                        ]);
+
+                        var options = {
+//                            width: 800,
+//                            height: 600,
+                            legend: { position: 'top', maxLines: 3 },
+                            title: 'Positive sentiment - ' + $("#searchField").val(),
+                            bar: { groupWidth: '75%' },
+                            isStacked: true
+                        };
+
+                        var optionsN = {
+//                            width: 800,
+//                            height: 600,
+                            legend: { position: 'top', maxLines: 3 },
+                            title: 'Negative sentiment - ' + $("#searchField").val(),
+                            bar: { groupWidth: '75%' },
+                            isStacked: true
+                        };
+
+                        if(data2.length > 1) {
+                            var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+                            chart.draw(data, options);
+                        } else {
+                            warning('cannot find data');
+                        }
+
+                        if(data3.length > 1) {
+                            var chartN = new google.visualization.BarChart(document.getElementById('chart_div_negative'));
+                            chartN.draw(dataN, optionsN);
+                        } else {
+                            warning('cannot find data');
+                        }
+
+                    }});
+
+
+                    }
+
+
+
+                    function drawChart2() {
+                        $('#alert_placeholder').html('');
+                        console.log('drawChart');
+//                var jsonData = $.ajax({
+//                    url: "/tweetSentimentByKeyword?keyword=" + $("#searchField").val(),
+//                    dataType: "json",
+//                    async: false
+//                }).responseText;
+
+
+                        jQuery.ajax({
+                            type: "GET",
+                            url: "/tweetSentiment2ByKeyword?keyword=" + $("#searchField2").val(),
+                            cache: true,
+                            success: function (jsonData) {
+                                console.log('jsonData=' + jsonData);
+                                // var obj = jQuery.parseJSON(jsonData);
+
+                                var data2 = [];
+                                var data3 = [];
+
+                                data2.push(['Year', 'Liberal', "Labor", "Green", "Nationals"]);
+                                data3.push(['Year', 'Liberal', "Labor", "Green", "Nationals"]);
+
+                                var positiveData = jsonData.positive;
+                                console.log('positiveData=' + positiveData);
+                                var negativeData = jsonData.negative;
+                                for (var key in positiveData) {
+
+                                    data2.push([key.toString(), positiveData[key]['liberal'], positiveData[key]['labor'], positiveData[key]['green'], positiveData[key]['nationals']]);
+
+                                }
+
+                                for (var key in negativeData) {
+
+                                    data3.push([key.toString(), negativeData[key]['liberal'], negativeData[key]['labor'], negativeData[key]['green'], negativeData[key]['nationals']]);
+
+                                }
+
+                                var data = google.visualization.arrayToDataTable(data2);
+                                var dataN = google.visualization.arrayToDataTable(data3);
+
+//                        var data = google.visualization.arrayToDataTable([
+//                            ['Party', 'Fantasy & Sci Fi', 'Romance', 'Mystery/Crime', 'General',
+//                                'Western', 'Literature'  ],
+//                            ['2010', 10, 0, 0, 0, 0, 0],
+//                            ['2020', 16, 22, 23, 30, 16, 9],
+//                            ['2030', 28, 19, 29, 30, 12, 13],
+//                        ]);
+
+                                var options = {
+//                            width: 800,
+//                            height: 600,
+                                    legend: { position: 'top', maxLines: 3 },
+                                    title: 'Positive sentiment - ' + $("#searchField2").val(),
+                                    bar: { groupWidth: '75%' },
+                                    isStacked: true
+                                };
+
+                                var optionsN = {
+//                            width: 800,
+//                            height: 600,
+                                    legend: { position: 'top', maxLines: 3 },
+                                    title: 'Negative sentiment - ' + $("#searchField2").val(),
+                                    bar: { groupWidth: '75%' },
+                                    isStacked: true
+                                };
+                                if(data2.length > 1) {
+                                    var chart = new google.visualization.BarChart(document.getElementById('chart_div2'));
+                                    chart.draw(data, options);
+                                } else {
+                                    warning('cannot find data');
+                                }
+                                if(data3.length > 1) {
+                                    var chartN = new google.visualization.BarChart(document.getElementById('chart_div2_negative'));
+                                    chartN.draw(dataN, optionsN);
+                                } else {
+                                    warning('cannot find data');
+                                }
+
+                            }});
+
+
+                    }
+
+
+                    $( "#searchBtn" ).click(function () {
+                        drawChart1();
+                    });
+
+                    $( "#searchBtn2" ).click(function () {
+                        drawChart2();
+                    });
+
+
+
+
+            }
+
+            )
+            ;
+
+
+    </script>
+
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Victorian Political Tweets Analysis</a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+
+            <ul class="nav nav-sidebar">
+
+                <li><a href="index.html">Politician List</a></li>
+
+                <li><a href="followers_count.html">Popular Politicians</a></li>
+                <li><a href="retweet_count.html">Most Retweeted Politicians</a></li>
+            </ul>
+
+            <ul class="nav nav-sidebar">
+                <li><a href="first_tweet_report.html">First Tweet</a></li>
+                <li><a href="weekday_report.html">Tweet Weekday</a></li>
+                <li><a href="tweet_time_report.html">Tweet Time</a></li>
+                <li><a href="tweetsource_report.html">Tweet Source</a></li>
+                <li><a href="geolocation_report.html">Tweet Geolocation</a></li>
+
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="tweet_sentiment.html">Tweet Sentiment</a></li>
+                <li class="active"><a href="tweet_sentiment2.html">Tweet Sentiment2</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="trendy_topic.html">Trendy Topic</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-12 col-md-offset-2 main">
+            <div class="row">
+                <div class="col-sm-1"><h5>Keyword:</h5></div>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" placeholder="Search..." id="searchField">
+                </div>
+                <div class="col-sm-1">
+                    <button type="button" class="btn btn-primary btn-lg" id="searchBtn">Search</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-1"><h5>Keyword:</h5></div>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" placeholder="Search..." id="searchField2">
+                </div>
+                <div class="col-sm-1">
+                    <button type="button" class="btn btn-primary btn-lg" id="searchBtn2">Search</button>
+                </div>
+            </div>
+            <div class="row" id="alert_placeholder">
+
+
+            </div>
+            <div class="row">
+                <div class="col-md-6"> <div id="chart_div" style="width: 900px; height: 500px;"></div></div>
+                <div class="col-md-6"><div id="chart_div2" style="width: 900px; height: 500px;"></div></div>
+                </div>
+            <div class="row">
+                <div class="col-md-6">  <div id="chart_div_negative" style="width: 900px; height: 500px;"></div></div>
+                <div class="col-md-6"> <div id="chart_div2_negative" style="width: 900px; height: 500px;"></div></div>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

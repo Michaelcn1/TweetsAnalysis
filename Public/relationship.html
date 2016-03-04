@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>Relationship</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <script src="js/libs/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+
+        var QueryString = function () {
+            // This function is anonymous, is executed immediately and
+            // the return value is assigned to QueryString!
+            var query_string = {};
+            var query = window.location.search.substring(1);
+            var vars = query.split("&");
+            for (var i=0;i<vars.length;i++) {
+                var pair = vars[i].split("=");
+                // If first entry with this name
+                if (typeof query_string[pair[0]] === "undefined") {
+                    query_string[pair[0]] = pair[1];
+                    // If second entry with this name
+                } else if (typeof query_string[pair[0]] === "string") {
+                    var arr = [ query_string[pair[0]], pair[1] ];
+                    query_string[pair[0]] = arr;
+                    // If third or later entry with this name
+                } else {
+                    query_string[pair[0]].push(pair[1]);
+                }
+            }
+            return query_string;
+        } ();
+
+        console.log(QueryString.screen_name);
+        google.load("visualization", "1", {packages: ["orgchart"]});
+        google.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+            console.log('drawChart');
+            var jsonData = $.ajax({
+                url: "/followedBy?screen_name=" + QueryString.screen_name + "&party=" + QueryString.party,
+                dataType: "json",
+                async: false
+            }).responseText;
+
+            var obj = jQuery.parseJSON(jsonData);
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Name');
+            data.addColumn('string', 'Manager');
+            data.addColumn('string', 'ToolTip');
+            data.addRows(obj);
+
+            var options = {
+                allowHtml:true
+            };
+
+            var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
+
+    </script>
+
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Victorian Political Tweets Analysis</a>
+        </div>
+        <div class="navbar-collapse collapse">
+
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+
+                <li><a href="index.html">Politician List</a></li>
+
+                <li ><a href="followers_count.html">Popular Politicians</a></li>
+                <li><a href="retweet_count.html">Most Retweeted Politicians</a></li>
+            </ul>
+
+            <ul class="nav nav-sidebar">
+                <li><a href="first_tweet_report.html">First Tweet</a></li>
+                <li><a href="weekday_report.html">Tweet Weekday</a></li>
+                <li><a href="tweet_time_report.html">Tweet Time</a></li>
+                <li><a href="tweetsource_report.html">Tweet Source</a></li>
+                <li><a href="geolocation_report.html">Tweet Geolocation</a></li>
+
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="tweet_sentiment.html">Tweet Sentiment</a></li>
+                <li><a href="tweet_sentiment2.html">Tweet Sentiment2</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="trendy_topic.html">Trendy Topic</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1 class="page-header">Followed By</h1>
+            <div id="chart_div" style="width: 900px; height: 500px;"></div>
+
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
